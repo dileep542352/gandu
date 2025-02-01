@@ -61,7 +61,10 @@ async def save(client: Client, message: Message):
     if BatchStatus.IS_BATCH.get(message.from_user.id) == False:
         return await message.reply_text("**One task is already in progress. Use /cancel to stop it.**")
 
-    datas = message.text.split("/")
+    # Clean up the message text by removing spaces and splitting
+    cleaned_text = message.text.replace(" ", "")
+    datas = cleaned_text.split("/")
+    
     try:
         msg_range = datas[-1].replace("?single", "")
         if "-" in msg_range:
@@ -90,10 +93,10 @@ async def save(client: Client, message: Message):
 
 async def process_message(client, acc, message, datas, msg_id):
     try:
-        if "https://t.me/c/" in message.text:
+        if "https://t.me/c/" in message.text.replace(" ", ""):
             chat_id = int("-100" + datas[4])
             await handle_private(client, acc, message, chat_id, msg_id)
-        elif "https://t.me/b/" in message.text:
+        elif "https://t.me/b/" in message.text.replace(" ", ""):
             username = datas[4]
             await handle_private(client, acc, message, username, msg_id)
         else:
