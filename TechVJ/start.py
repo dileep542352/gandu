@@ -61,7 +61,6 @@ async def save(client: Client, message: Message):
     if BatchStatus.IS_BATCH.get(message.from_user.id) == False:
         return await message.reply_text("**One task is already in progress. Use /cancel to stop it.**")
 
-    # Clean up the message text by removing spaces and splitting
     cleaned_text = message.text.replace(" ", "")
     datas = cleaned_text.split("/")
     
@@ -102,11 +101,9 @@ async def process_message(client, acc, message, datas, msg_id):
         else:
             try:
                 username = datas[3]
-                # First try to get message as bot
                 try:
                     msg = await client.get_messages(username, msg_id)
                 except:
-                    # If failed, try with user account
                     msg = await acc.get_messages(username, msg_id)
                 
                 if msg:
@@ -123,11 +120,7 @@ async def process_message(client, acc, message, datas, msg_id):
                             reply_to_message_id=message.id
                         )
                 else:
-                    await client.send_message(
-                        message.chat.id,
-                        "The message is not available.",
-                        reply_to_message_id=message.id
-                    )
+                    return
             except Exception as e:
                 await client.send_message(
                     message.chat.id,
@@ -147,15 +140,9 @@ async def handle_private(client: Client, acc, message: Message, chat_id, msg_id:
         try:
             msg = await acc.get_messages(chat_id, msg_id)
         except:
-            # If failed with user account, try with bot
             msg = await client.get_messages(chat_id, msg_id)
             
         if not msg:
-            await client.send_message(
-                message.chat.id,
-                "Unable to access this message.",
-                reply_to_message_id=message.id
-            )
             return
 
         chat = message.chat.id
@@ -171,11 +158,6 @@ async def handle_private(client: Client, acc, message: Message, chat_id, msg_id:
 
         msg_type = get_message_type(msg)
         if not msg_type:
-            await client.send_message(
-                chat,
-                "Unsupported message type.",
-                reply_to_message_id=message.id
-            )
             return
 
         smsg = await client.send_message(chat, '**Downloading...**', reply_to_message_id=message.id)
